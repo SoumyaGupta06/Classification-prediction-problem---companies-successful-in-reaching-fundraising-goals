@@ -13,8 +13,8 @@ Hyperparameter Tuning: Use techniques like grid search and cross-validation to o
 Comparative Analysis: Analyze and compare models to identify the best-performing model for ICO success prediction.
 
 **Models used-**
-Naive Bayes (for categorical data)
-Decision Trees (with AdaBoost)
+Naive Bayes (for categorical data),
+Decision Trees (with AdaBoost),
 Artificial Neural Network (ANN)
 
 **Results-**
