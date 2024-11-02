@@ -24,7 +24,7 @@ def evaluate_model(y_test, y_pred, y_pred_proba=None, multi_class=False):
         print(f"{metric}:\n{value}\n")
 
 # Load and prepare data
-data = pd.read_csv(r'D:\MSc course material\ML\Assessment\Data\MLDataset.csv')
+data = pd.read_csv(r'D:\MLDataset.csv')
 features = ["hasVideo", "rating", "priceUSD", "Region.US", "teamSize", 
             "hasGithub", "hasReddit", "platformIndicator", "coinNum", 
             "minInvestment", "distributedPercentage", "durationDays"]
