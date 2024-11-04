@@ -9,6 +9,70 @@ from sklearn.metrics import (confusion_matrix, accuracy_score,
 import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.impute import SimpleImputer
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
+
+# Load data
+data_ico = pd.read_csv("D:\LUBS5990M_Data_202223.csv", encoding='UTF-8')
+print(data_ico.describe())
+print(data_ico.shape)
+
+#----------------------------Data preprocessing----------------------------------
+dateDel = data_ico
+dateDel = dateDel[(dateDel['distributedPercentage'] > 0) & (dateDel['distributedPercentage'] <= 1)]
+
+#----Outliers----
+data_cleaning = dateDel
+# Detect and remove outliers for 'coinNum'
+coin_outliers = data_cleaning['coinNum'][((data_cleaning['coinNum'] < data_cleaning['coinNum'].quantile(0.25) - 1.5 * (data_cleaning['coinNum'].quantile(0.75) - data_cleaning['coinNum'].quantile(0.25))) | 
+                                          (data_cleaning['coinNum'] > data_cleaning['coinNum'].quantile(0.75) + 1.5 * (data_cleaning['coinNum'].quantile(0.75) - data_cleaning['coinNum'].quantile(0.25))))]
+coin_no_outlier = data_cleaning[~data_cleaning['coinNum'].isin(coin_outliers)]
+plt.boxplot(coin_no_outlier['coinNum'])
+plt.ylabel("coinNum")
+plt.show()
+
+plt.hist(coin_no_outlier['coinNum'], bins=int(np.sqrt(len(coin_no_outlier))))
+plt.xlabel("coinNum")
+plt.title("Histogram-coinNum (without outliers)")
+plt.show()
+
+# Detect and remove outliers for 'priceUSD'
+price_outliers = coin_no_outlier['priceUSD'][((coin_no_outlier['priceUSD'] < coin_no_outlier['priceUSD'].quantile(0.25) - 1.5 * (coin_no_outlier['priceUSD'].quantile(0.75) - coin_no_outlier['priceUSD'].quantile(0.25))) | 
+                                              (coin_no_outlier['priceUSD'] > coin_no_outlier['priceUSD'].quantile(0.75) + 1.5 * (coin_no_outlier['priceUSD'].quantile(0.75) - coin_no_outlier['priceUSD'].quantile(0.25))))]
+coin_no_outlier2 = coin_no_outlier[~coin_no_outlier['priceUSD'].isin(price_outliers)]
+plt.boxplot(coin_no_outlier2['priceUSD'])
+plt.ylabel("priceUSD")
+plt.show()
+
+plt.hist(coin_no_outlier2['priceUSD'], bins=int(np.sqrt(len(coin_no_outlier2))))
+plt.xlabel("priceUSD")
+plt.title("priceUSD (without outliers)")
+plt.show()
+
+coin_no_outlier.to_csv("D:\CleanDataset(without_outliers).csv", index=False)
+
+#----Missing Data----
+
+data_imput = pd.read_csv("D:\CleanDataset(without_outliers).csv", encoding='UTF-8')
+print(data_imput.isna().sum())  
+
+numeric_data = data_imput.select_dtypes(include=[np.number])
+non_numeric_data = data_imput.select_dtypes(exclude=[np.number])
+
+imputer = IterativeImputer(max_iter=10, random_state=0)
+numeric_data_imputed = pd.DataFrame(imputer.fit_transform(numeric_data), columns=numeric_data.columns)
+
+data_imputed = pd.concat([numeric_data_imputed, non_numeric_data.reset_index(drop=True)], axis=1)
+
+data_imputed.to_csv("D:\MLDataset.csv", index=False)
+
+print("Final shape after combining:", data_imputed.shape)
+
+
+#------------------Model development------------------------
 
 # model evaluation
 def evaluate_model(y_test, y_pred, y_pred_proba=None, multi_class=False):
